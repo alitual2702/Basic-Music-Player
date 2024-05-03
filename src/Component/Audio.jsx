@@ -2,10 +2,9 @@ import React, { useRef, useState } from "react";
 import { FaStepBackward, FaPlay, FaPause, FaStepForward } from "react-icons/fa";
 
 const Audio = () => {
-
   //  States and Variables--------------------------------------------------
-  let soungTag = document.querySelector(".hang");
-  const [documenticon, setdocumenticon] = useState(null);
+  
+  
   const [converter, setconverter] = useState("0");
   const [durationsound, setdurationsound] = useState("0");
   const [index, setIndex] = useState(0);
@@ -13,20 +12,21 @@ const Audio = () => {
   let progressref = useRef(null);
   let numref = useRef(null);
   let durationref = useRef(null);
-
+  let songref = useRef(null);
 
   // Song Updating --------------------------------------------------------
   function timeUpdate() {
-    let durationMinutes = Math.floor(soungTag.duration / 60);
-    let durationSeconds = Math.floor(soungTag.duration % 60);
+    
+    let durationMinutes = Math.floor(songref.current.duration / 60);
+    let durationSeconds = Math.floor(songref.current.duration % 60);
     if (durationSeconds < 10) {
       setdurationsound(durationMinutes + ":0" + durationSeconds);
     } else {
       setdurationsound(durationMinutes + ":" + durationSeconds);
     }
 
-    let minutes = Math.floor(soungTag.currentTime / 60);
-    let seconds = Math.floor(soungTag.currentTime % 60);
+    let minutes = Math.floor(songref.current.currentTime / 60);
+    let seconds = Math.floor(songref.current.currentTime % 60);
     if (seconds < 10) {
       setconverter(minutes + ":0" + seconds);
     } else {
@@ -34,8 +34,10 @@ const Audio = () => {
     }
 
     progressref.current.style.left =
-      Math.floor((soungTag.currentTime / soungTag.duration) * 100) + "%";
-  }
+      Math.floor(
+        (songref.current.currentTime / songref.current.duration) * 100
+      ) + "%";
+    }
 
   // All Musics ----------------------------------------------------
 
@@ -128,16 +130,14 @@ const Audio = () => {
       setIndex(index + 1);
     }
 
-    if (documenticon.play()) {
-      settruthy((truthy) => !truthy);
-      setdocumenticon(documenticon.pause());
+    if (songref.current.play() && truthy == false) {
+      songref.current.pause();
     } else {
-      truthy;
+      settruthy((truthy) => !truthy);
     }
   };
 
   // Handle Backward Button
-
 
   const handlebackward = () => {
     if (index <= musicsAll[0].key) {
@@ -145,25 +145,22 @@ const Audio = () => {
     } else {
       setIndex(index - 1);
     }
-    if (documenticon.play()) {
-      settruthy((truthy) => !truthy);
-      setdocumenticon(documenticon.pause());
+    if (songref.current.play() && truthy == false) {
+      songref.current.pause();
     } else {
-      truthy;
+      settruthy((truthy) => !truthy);
     }
   };
 
   // Play Music and Conrol Play Button
 
   function playit() {
-    setdocumenticon(document.querySelector(".hang"));
-
-    documenticon.play();
+    songref.current.play();
 
     settruthy((val) => !val);
 
     let outIt = setInterval(() => {
-      if (soungTag.currentTime >= soungTag.duration) {
+      if (songref.current.currentTime >= songref.current.duration) {
         clearInterval(outIt);
         setconverter(0);
         progressref.current.style.left = 0 + "%";
@@ -181,19 +178,15 @@ const Audio = () => {
   // Pause Music
 
   function pauseit() {
-    setdocumenticon(soungTag);
-    documenticon.pause();
+    songref.current.pause();
     settruthy((val) => !val);
+
+    
   }
 
   return (
     <div className="audio-section">
-
-      <audio
-        className="hang"
-        src={musicsAll[index].url}
-        type="audio/mpeg"
-      ></audio>
+      <audio ref={songref} src={musicsAll[index].url} type="audio/mpeg"></audio>
       {/* -------------------------------------------------- */}
       <h1>{musicsAll[index].title}</h1>
       {/* ---------------------------------- */}
@@ -202,7 +195,6 @@ const Audio = () => {
       <img src={musicsAll[index].img} />
       {/* ---------------------------------- */}
       <div className="progress">
-
         <span ref={numref} className="time">
           {converter}
         </span>
@@ -212,7 +204,6 @@ const Audio = () => {
         </span>
 
         <span ref={progressref} className="moving"></span>
-
       </div>
       {/* --------------------------------- */}
       <div className="btn-music">
